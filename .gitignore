@@ -169,3 +169,7 @@ crashlytics-build.properties
 ### php-cs-fixer ###
 .php_cs.cache
 cs_fixer_tmp*
+
+
+### Node.js ###
+/node_modules
