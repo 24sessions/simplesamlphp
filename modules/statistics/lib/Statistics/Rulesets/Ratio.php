@@ -1,13 +1,9 @@
 <?php
-
-namespace SimpleSAML\Module\statistics\Statistics\Rulesets;
-
 /*
  * @author Andreas Åkre Solberg <andreas.solberg@uninett.no>
  * @package SimpleSAMLphp
  */
-
-class Ratio extends BaseRule
+class sspmod_statistics_Statistics_Rulesets_Ratio extends sspmod_statistics_Statistics_Rulesets_BaseRule
 {
     protected $refrule1;
     protected $refrule2;
@@ -17,8 +13,8 @@ class Ratio extends BaseRule
      */
     public function __construct($statconfig, $ruleconfig, $ruleid, $available)
     {
-        assert($statconfig instanceof \SimpleSAML\Configuration);
-        assert($ruleconfig instanceof \SimpleSAML\Configuration);
+        assert($statconfig instanceof SimpleSAML_Configuration);
+        assert($ruleconfig instanceof SimpleSAML_Configuration);
 
         parent::__construct($statconfig, $ruleconfig, $ruleid, $available);
 
@@ -29,8 +25,8 @@ class Ratio extends BaseRule
         $statruleConfig1 = $statrulesConfig->getConfigItem($refNames[0]);
         $statruleConfig2 = $statrulesConfig->getConfigItem($refNames[1]);
 
-        $this->refrule1 = new BaseRule($this->statconfig, $statruleConfig1, $refNames[0], $available);
-        $this->refrule2 = new BaseRule($this->statconfig, $statruleConfig2, $refNames[1], $available);
+        $this->refrule1 = new sspmod_statistics_Statistics_Rulesets_BaseRule($this->statconfig, $statruleConfig1, $refNames[0], $available);
+        $this->refrule2 = new sspmod_statistics_Statistics_Rulesets_BaseRule($this->statconfig, $statruleConfig2, $refNames[1], $available);
     }
 
     public function availableTimeRes()
@@ -65,13 +61,8 @@ class Ratio extends BaseRule
 
         $refNames = $this->ruleconfig->getArray('ref');
 
-        $dataset = new \SimpleSAML\Module\statistics\RatioDataset(
-            $this->statconfig,
-            $this->ruleconfig,
-            $refNames,
-            $timeres,
-            $fileslot
-        );
+        $dataset = new sspmod_statistics_RatioDataset($this->statconfig, $this->ruleconfig, $refNames, $timeres, $fileslot);
         return $dataset;
     }
 }
+

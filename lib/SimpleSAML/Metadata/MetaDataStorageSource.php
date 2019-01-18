@@ -1,6 +1,5 @@
 <?php
 
-namespace SimpleSAML\Metadata;
 
 /**
  * This abstract class defines an interface for metadata storage sources.
@@ -13,9 +12,10 @@ namespace SimpleSAML\Metadata;
  * @author Andreas Aakre Solberg, UNINETT AS.
  * @package SimpleSAMLphp
  */
-
-abstract class MetaDataStorageSource
+abstract class SimpleSAML_Metadata_MetaDataStorageSource
 {
+
+
     /**
      * Parse array with metadata sources.
      *
@@ -26,17 +26,17 @@ abstract class MetaDataStorageSource
      *
      * @return array  Parsed metadata configuration.
      *
-     * @throws \Exception If something is wrong in the configuration.
+     * @throws Exception If something is wrong in the configuration.
      */
     public static function parseSources($sourcesConfig)
     {
         assert(is_array($sourcesConfig));
 
-        $sources = [];
+        $sources = array();
 
         foreach ($sourcesConfig as $sourceConfig) {
             if (!is_array($sourceConfig)) {
-                throw new \Exception("Found an element in metadata source configuration which wasn't an array.");
+                throw new Exception("Found an element in metadata source configuration which wasn't an array.");
             }
 
             $sources[] = self::getSource($sourceConfig);
@@ -55,7 +55,7 @@ abstract class MetaDataStorageSource
      *
      * @return mixed An instance of a metadata source with the given configuration.
      *
-     * @throws \Exception If the metadata source type is invalid.
+     * @throws Exception If the metadata source type is invalid.
      */
     public static function getSource($sourceConfig)
     {
@@ -69,26 +69,26 @@ abstract class MetaDataStorageSource
 
         switch ($type) {
             case 'flatfile':
-                return new MetaDataStorageHandlerFlatFile($sourceConfig);
+                return new SimpleSAML_Metadata_MetaDataStorageHandlerFlatFile($sourceConfig);
             case 'xml':
-                return new MetaDataStorageHandlerXML($sourceConfig);
+                return new SimpleSAML_Metadata_MetaDataStorageHandlerXML($sourceConfig);
             case 'serialize':
-                return new MetaDataStorageHandlerSerialize($sourceConfig);
+                return new SimpleSAML_Metadata_MetaDataStorageHandlerSerialize($sourceConfig);
             case 'mdx':
             case 'mdq':
-                return new Sources\MDQ($sourceConfig);
+                return new \SimpleSAML\Metadata\Sources\MDQ($sourceConfig);
             case 'pdo':
-                return new MetaDataStorageHandlerPdo($sourceConfig);
+                return new SimpleSAML_Metadata_MetaDataStorageHandlerPdo($sourceConfig);
             default:
                 // metadata store from module
                 try {
-                    $className = \SimpleSAML\Module::resolveClass(
+                    $className = SimpleSAML\Module::resolveClass(
                         $type,
                         'MetadataStore',
-                        '\SimpleSAML\Metadata\MetaDataStorageSource'
+                        'SimpleSAML_Metadata_MetaDataStorageSource'
                     );
-                } catch (\Exception $e) {
-                    throw new \SimpleSAML\Error\CriticalConfigurationError(
+                } catch (Exception $e) {
+                    throw new SimpleSAML\Error\CriticalConfigurationError(
                         "Invalid 'type' for metadata source. Cannot find store '$type'.",
                         null
                     );
@@ -111,7 +111,7 @@ abstract class MetaDataStorageSource
      */
     public function getMetadataSet($set)
     {
-        return [];
+        return array();
     }
 
 
@@ -176,7 +176,7 @@ abstract class MetaDataStorageSource
         $metadataSet = $this->getMetadataSet($set);
 
         foreach ($metadataSet as $index => $entry) {
-            $cidrHints = [];
+            $cidrHints = array();
             
             // support hint.cidr for idp discovery
             if (array_key_exists('hint.cidr', $entry) && is_array($entry['hint.cidr'])) {
@@ -184,8 +184,8 @@ abstract class MetaDataStorageSource
             }
 
             // support discohints in idp metadata for idp discovery
-            if (array_key_exists('DiscoHints', $entry)
-                && array_key_exists('IPHint', $entry['DiscoHints'])
+            if (array_key_exists('DiscoHints', $entry) 
+                && array_key_exists('IPHint', $entry['DiscoHints']) 
                 && is_array($entry['DiscoHints']['IPHint'])) {
                 // merge with hints derived from discohints, but prioritize hint.cidr in case it is used
                 $cidrHints = array_merge($entry['DiscoHints']['IPHint'], $cidrHints);
@@ -196,7 +196,7 @@ abstract class MetaDataStorageSource
             }
 
             foreach ($cidrHints as $hint_entry) {
-                if (\SimpleSAML\Utils\Net::ipCIDRcheck($hint_entry, $ip)) {
+                if (SimpleSAML\Utils\Net::ipCIDRcheck($hint_entry, $ip)) {
                     if ($type === 'entityid') {
                         return $entry['entityid'];
                     } else {

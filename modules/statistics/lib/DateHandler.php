@@ -1,20 +1,16 @@
 <?php
-
-namespace SimpleSAML\Module\statistics;
-
 /*
  * @author Andreas Åkre Solberg <andreas.solberg@uninett.no>
  * @package SimpleSAMLphp
  */
-
-class DateHandler
+class sspmod_statistics_DateHandler
 {
     protected $offset;
 
     /**
      * Constructor
      *
-     * @param array $offset Date offset
+     * @param array $offset 	Date offset
      */
     public function __construct($offset)
     {
@@ -32,14 +28,14 @@ class DateHandler
     public function toSlot($epoch, $slotsize)
     {
         $dst = $this->getDST($epoch);
-        return floor(($epoch + $this->offset + $dst) / $slotsize);
+        return floor( ($epoch + $this->offset + $dst) / $slotsize);
     }
 
     public function fromSlot($slot, $slotsize)
     {
-        $temp = $slot * $slotsize - $this->offset;
+        $temp = $slot*$slotsize - $this->offset;
         $dst = $this->getDST($temp);
-        return $slot * $slotsize - $this->offset - $dst;
+        return $slot*$slotsize - $this->offset - $dst;
     }
 
     public function prettyDateEpoch($epoch, $dateformat)

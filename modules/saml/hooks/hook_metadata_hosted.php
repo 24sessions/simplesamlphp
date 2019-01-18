@@ -10,7 +10,7 @@ function saml_hook_metadata_hosted(&$metadataHosted)
 {
     assert(is_array($metadataHosted));
 
-    $sources = \SimpleSAML\Auth\Source::getSourcesOfType('saml:SP');
+    $sources = SimpleSAML_Auth_Source::getSourcesOfType('saml:SP');
 
     foreach ($sources as $source) {
         $metadata = $source->getMetadata();
@@ -20,16 +20,16 @@ function saml_hook_metadata_hosted(&$metadataHosted)
             $name = $metadata->getValue('OrganizationDisplayName', null);
         }
         if ($name === null) {
-            $name = $source->getAuthId();
+            $name = $source->getAuthID();
         }
 
-        $md = [
+        $md = array(
             'entityid' => $source->getEntityId(),
             'metadata-index' => $source->getEntityId(),
             'metadata-set' => 'saml20-sp-hosted',
-            'metadata-url' => $source->getMetadataURL().'?output=xhtml',
+            'metadata-url' => $source->getMetadataURL() . '?output=xhtml',
             'name' => $name,
-        ];
+        );
 
         $metadataHosted[] = $md;
     }

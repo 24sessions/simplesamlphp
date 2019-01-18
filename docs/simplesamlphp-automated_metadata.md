@@ -68,43 +68,43 @@ Now we are going to proceed to configure the metarefresh module. First, edit the
 
 Here's an example of a possible configuration for both the Kalmar Federation and UK Access Management Federation:
 
-	$config = [
-		'sets' => [
-			'kalmar' => [
-				'cron'		=> ['hourly'],
-				'sources'	=> [
-					[
+	$config = array(
+		'sets' => array(
+			'kalmar' => array(
+				'cron'		=> array('hourly'),
+				'sources'	=> array(
+					array(
 						'src' => 'https://kalmar.feide.no/simplesaml/module.php/aggregator/?id=kalmarcentral&mimetype=text/plain&exclude=norway',
-						'certificates' => [
+						'certificates' => array(
 							'current.crt',
 							'rollover.crt',
-						],
-						'template' => [
-							'tags'	=> ['kalmar'],
-							'authproc' => [
-								51 => ['class' => 'core:AttributeMap', 'oid2name'],
-							],
-						],
-					],
-				],
+						),
+						'template' => array(
+							'tags'	=> array('kalmar'),
+							'authproc' => array(
+								51 => array('class' => 'core:AttributeMap', 'oid2name'),
+							),
+						),
+					),
+				),
 				'expireAfter' 		=> 60*60*24*4, // Maximum 4 days cache time.
 				'outputDir' 	=> 'metadata/metarefresh-kalmar/',
 				'outputFormat' => 'flatfile',
-			],
-			'uk' => [
-				'cron'		=> ['hourly'],
-				'sources'	=> [
-					[
+			),
+			'uk' => array(
+				'cron'		=> array('hourly'),
+				'sources'	=> array(
+					array(
 						'src' => 'http://metadata.ukfederation.org.uk/ukfederation-metadata.xml',
 						'validateFingerprint' => 'D0:E8:40:25:F0:B1:2A:CC:74:22:ED:C3:87:04:BC:29:BB:7B:9A:40',
-					],
-				],
+					),
+				),
 				'expireAfter' 		=> 60*60*24*4, // Maximum 4 days cache time.
 				'outputDir' 	=> 'metadata/metarefresh-ukaccess/',
 				'outputFormat' => 'serialize',
-			],
-		]
-	];
+			),
+		)
+	);
 
 
 The configuration consists of one or more metadata sets. Each metadata set has its own configuration, representing a metadata set of sources.
@@ -180,11 +180,11 @@ web-server write access to the output directories. Following the previous exampl
 Now you can configure SimpleSAMLphp to use the metadata fetched by metarefresh. Edit the main
 config.php file, and modify the `metadata.sources` directive accordingly: 
 
-	'metadata.sources' => [
-		['type' => 'flatfile'],
-		['type' => 'flatfile', 'directory' => 'metadata/metarefresh-kalmar'],
-		['type' => 'serialize', 'directory' => 'metadata/metarefresh-ukaccess'],
-	],
+	'metadata.sources' => array(
+		array('type' => 'flatfile'),
+		array('type' => 'flatfile', 'directory' => 'metadata/metarefresh-kalmar'),
+		array('type' => 'serialize', 'directory' => 'metadata/metarefresh-ukaccess'),
+	),
 
 Remember that the `type` parameter here must match the `outputFormat` in the configuration of the module.
 

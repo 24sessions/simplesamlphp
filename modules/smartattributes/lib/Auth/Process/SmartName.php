@@ -1,22 +1,19 @@
 <?php
 
-namespace SimpleSAML\Module\smartattributes\Auth\Process;
-
 /**
  * Filter to set name in a smart way, based on available name attributes.
  *
  * @author Andreas Åkre Solberg, UNINETT AS.
  * @package SimpleSAMLphp
  */
-
-class SmartName extends \SimpleSAML\Auth\ProcessingFilter
+class sspmod_smartattributes_Auth_Process_SmartName extends SimpleSAML_Auth_ProcessingFilter
 {
     /**
      * Attributes which should be added/appended.
      *
      * Assiciative array of arrays.
      */
-    private $attributes = [];
+    private $attributes = array();
 
 
     private function getFullName($attributes)
@@ -52,7 +49,7 @@ class SmartName extends \SimpleSAML\Auth\ProcessingFilter
             if (isset($localname)) {
                 return $localname;
             }
-        }
+        }		
 
         return null;
     }
@@ -81,12 +78,12 @@ class SmartName extends \SimpleSAML\Auth\ProcessingFilter
         assert(is_array($request));
         assert(array_key_exists('Attributes', $request));
 
-        $attributes = &$request['Attributes'];
+        $attributes =& $request['Attributes'];
 
         $fullname = $this->getFullName($attributes);
 
         if (isset($fullname)) {
-            $request['Attributes']['smartname-fullname'] = [$fullname];
+            $request['Attributes']['smartname-fullname'] = array($fullname);
         }
     }
 }

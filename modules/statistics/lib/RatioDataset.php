@@ -1,23 +1,19 @@
 <?php
-
-namespace SimpleSAML\Module\statistics;
-
 /*
  * @author Andreas Åkre Solberg <andreas.solberg@uninett.no>
  * @package SimpleSAMLphp
  */
-
-class RatioDataset extends StatDataset
+class sspmod_statistics_RatioDataset extends sspmod_statistics_StatDataset
 {
     public function aggregateSummary()
     {
         /**
          * Aggregate summary table from dataset. To be used in the table view.
          */
-        $this->summary = [];
-        $noofvalues = [];
+        $this->summary = array(); 
+        $noofvalues = array();
         foreach ($this->results as $slot => $res) {
-            foreach ($res as $key => $value) {
+            foreach ($res AS $key => $value) {
                 if (array_key_exists($key, $this->summary)) {
                     $this->summary[$key] += $value;
                     if ($value > 0) {
@@ -60,12 +56,12 @@ class RatioDataset extends StatDataset
 
     public function combine($result1, $result2)
     {
-        $combined = [];
+        $combined = array();
 
         foreach ($result2 as $tick => $val) {
-            $combined[$tick] = [];
+            $combined[$tick] = array();
             foreach ($val as $index => $num) {
-                $combined[$tick][$index] = $this->divide(
+                $combined[$tick][$index] = $this->divide( 
                     $this->ag($index, $result1[$tick]),
                     $this->ag($index, $result2[$tick])
                 );
@@ -79,3 +75,4 @@ class RatioDataset extends StatDataset
         return null;
     }
 }
+

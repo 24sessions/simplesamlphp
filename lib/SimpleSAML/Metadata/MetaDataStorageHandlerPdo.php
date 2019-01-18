@@ -1,6 +1,5 @@
 <?php
 
-namespace SimpleSAML\Metadata;
 
 /**
  * Class for handling metadata files stored in a database.
@@ -11,9 +10,9 @@ namespace SimpleSAML\Metadata;
  *
  * @package SimpleSAMLphp
  */
-
-class MetaDataStorageHandlerPdo extends MetaDataStorageSource
+class SimpleSAML_Metadata_MetaDataStorageHandlerPdo extends SimpleSAML_Metadata_MetaDataStorageSource
 {
+
     /**
      * The PDO object
      */
@@ -27,12 +26,12 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
     /**
      * This is an associative array which stores the different metadata sets we have loaded.
      */
-    private $cachedMetadata = [];
+    private $cachedMetadata = array();
 
     /**
      * All the metadata sets supported by this MetaDataStorageHandler
      */
-    public $supportedSets = [
+    public $supportedSets = array(
         'adfs-idp-hosted',
         'adfs-sp-remote',
         'saml20-idp-hosted',
@@ -44,7 +43,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
         'shib13-sp-remote',
         'wsfed-idp-remote',
         'wsfed-sp-hosted'
-    ];
+    );
 
 
     /**
@@ -62,7 +61,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
     {
         assert(is_array($config));
 
-        $this->db = \SimpleSAML\Database::getInstance();
+        $this->db = SimpleSAML\Database::getInstance();
     }
 
 
@@ -76,7 +75,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
      *     given file.
      *
      * @throws Exception If a database error occurs.
-     * @throws \SimpleSAML\Error\Exception If the metadata can be retrieved from the database, but cannot be decoded.
+     * @throws SimpleSAML_Error_Exception If the metadata can be retrieved from the database, but cannot be decoded.
      */
     private function load($set)
     {
@@ -90,12 +89,12 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
 
         $stmt = $this->db->read("SELECT entity_id, entity_data FROM $tableName");
         if ($stmt->execute()) {
-            $metadata = [];
+            $metadata = array();
 
             while ($d = $stmt->fetch()) {
                 $data = json_decode($d['entity_data'], true);
                 if ($data === null) {
-                    throw new \SimpleSAML\Error\Exception("Cannot decode metadata for entity '${d['entity_id']}'");
+                    throw new SimpleSAML_Error_Exception("Cannot decode metadata for entity '${d['entity_id']}'");
                 }
                 if (!array_key_exists('entityid', $data)) {
                     $data['entityid'] = $d['entity_id'];
@@ -105,7 +104,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
 
             return $metadata;
         } else {
-            throw new \Exception('PDO metadata handler: Database error: '.var_export($this->db->getLastError(), true));
+            throw new Exception('PDO metadata handler: Database error: '.var_export($this->db->getLastError(), true));
         }
     }
 
@@ -127,7 +126,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
 
         $metadataSet = $this->load($set);
         if ($metadataSet === null) {
-            $metadataSet = [];
+            $metadataSet = array();
         }
 
         foreach ($metadataSet as $entityId => &$entry) {
@@ -142,17 +141,17 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
         return $metadataSet;
     }
 
-    /**
+    /**      
      * Retrieve a metadata entry.
-     *
+     *      
      * @param string $entityId The entityId we are looking up.
      * @param string $set The set we are looking for metadata in.
      *
      * @return array An associative array with metadata for the given entity, or NULL if we are unable to
      *         locate the entity.
      */
-    public function getMetaData($entityId, $set)
-    {
+    public function getMetaData($entityId, $set)      
+    {       
         assert(is_string($entityId));
         assert(is_string($set));
 
@@ -162,22 +161,19 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
             return null;
         }
 
-        $stmt = $this->db->read(
-            "SELECT entity_id, entity_data FROM $tableName WHERE entity_id=:entityId",
-            ['entityId' => $entityId]
-        );
+        $stmt = $this->db->read("SELECT entity_id, entity_data FROM $tableName WHERE entity_id=:entityId", array('entityId' => $entityId));
         if ($stmt->execute()) {
             $rowCount = 0;
             $data = null;
 
             while ($d = $stmt->fetch()) {
                 if (++$rowCount > 1) {
-                    \SimpleSAML\Logger::warning("Duplicate match for $entityId in set $set");
+                    SimpleSAML\Logger::warning("Duplicate match for $entityId in set $set");
                     break;
                 }
                 $data = json_decode($d['entity_data'], true);
                 if ($data === null) {
-                    throw new \SimpleSAML\Error\Exception("Cannot decode metadata for entity '${d['entity_id']}'");
+                    throw new SimpleSAML_Error_Exception("Cannot decode metadata for entity '${d['entity_id']}'");
                 }
                 if (!array_key_exists('entityid', $data)) {
                     $data['entityid'] = $d['entity_id'];
@@ -185,7 +181,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
             }
             return $data;
         } else {
-            throw new \Exception('PDO metadata handler: Database error: '.var_export($this->db->getLastError(), true));
+            throw new Exception('PDO metadata handler: Database error: '.var_export($this->db->getLastError(), true));
         }
     }
 
@@ -209,7 +205,7 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
         } elseif ($set === 'adfs-idp-hosted') {
             return 'urn:federation:'.\SimpleSAML\Utils\HTTP::getSelfHost().':idp';
         } else {
-            throw new \Exception('Can not generate dynamic EntityID for metadata of this type: ['.$set.']');
+            throw new Exception('Can not generate dynamic EntityID for metadata of this type: ['.$set.']');
         }
     }
 
@@ -237,17 +233,17 @@ class MetaDataStorageHandlerPdo extends MetaDataStorageSource
 
         $metadata = $this->db->read(
             "SELECT entity_id, entity_data FROM $tableName WHERE entity_id = :entity_id",
-            [
+            array(
                 'entity_id' => $index,
-            ]
+            )
         );
 
         $retrivedEntityIDs = $metadata->fetch();
 
-        $params = [
+        $params = array(
             'entity_id'   => $index,
             'entity_data' => json_encode($entityData),
-        ];
+        );
 
         if ($retrivedEntityIDs !== false && count($retrivedEntityIDs) > 0) {
             $rows = $this->db->write(

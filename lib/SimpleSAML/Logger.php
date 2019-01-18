@@ -12,6 +12,7 @@ namespace SimpleSAML;
  */
 class Logger
 {
+
     /**
      * @var \SimpleSAML\Logger\LoggingHandlerInterface|false|null
      */
@@ -30,14 +31,14 @@ class Logger
     /**
      * @var array
      */
-    private static $capturedLog = [];
+    private static $capturedLog = array();
 
     /**
      * Array with messages logged before the logging handler was initialized.
      *
      * @var array
      */
-    private static $earlyLog = [];
+    private static $earlyLog = array();
 
     /**
      * List of log levels.
@@ -46,7 +47,7 @@ class Logger
      *
      * @var array
      */
-    private static $logLevelStack = [];
+    private static $logLevelStack = array();
 
     /**
      * The current mask of log levels disabled.
@@ -265,11 +266,11 @@ class Logger
     public static function flush()
     {
         try {
-            $s = Session::getSessionFromRequest();
+            $s = \SimpleSAML_Session::getSessionFromRequest();
         } catch (\Exception $e) {
             // loading session failed. We don't care why, at this point we have a transient session, so we use that
             self::error('Cannot load or create session: '.$e->getMessage());
-            $s = Session::getSessionFromRequest();
+            $s = \SimpleSAML_Session::getSessionFromRequest();
         }
         self::$trackid = $s->getTrackID();
 
@@ -305,7 +306,7 @@ class Logger
         assert(is_int($mask));
 
         $currentEnabled = error_reporting();
-        self::$logLevelStack[] = [$currentEnabled, self::$logMask];
+        self::$logLevelStack[] = array($currentEnabled, self::$logMask);
 
         $currentEnabled &= ~$mask;
         error_reporting($currentEnabled);
@@ -336,11 +337,11 @@ class Logger
     private static function defer($level, $message, $stats)
     {
         // save the message for later
-        self::$earlyLog[] = ['level' => $level, 'string' => $message, 'statsLog' => $stats];
+        self::$earlyLog[] = array('level' => $level, 'string' => $message, 'statsLog' => $stats);
 
         // register a shutdown handler if needed
         if (!self::$shutdownRegistered) {
-            register_shutdown_function(['SimpleSAML\Logger', 'flush']);
+            register_shutdown_function(array('SimpleSAML\Logger', 'flush'));
             self::$shutdownRegistered = true;
         }
     }
@@ -352,16 +353,15 @@ class Logger
         self::$loggingHandler = false;
 
         // a set of known logging handlers
-        $known_handlers = [
+        $known_handlers = array(
             'syslog'   => 'SimpleSAML\Logger\SyslogLoggingHandler',
             'file'     => 'SimpleSAML\Logger\FileLoggingHandler',
             'errorlog' => 'SimpleSAML\Logger\ErrorLogLoggingHandler',
-            'stderr' => 'SimpleSAML\Logger\StandardErrorLoggingHandler',
-        ];
+        );
 
         // get the configuration
-        $config = Configuration::getInstance();
-        assert($config instanceof Configuration);
+        $config = \SimpleSAML_Configuration::getInstance();
+        assert($config instanceof \SimpleSAML_Configuration);
 
         // setting minimum log_level
         self::$logLevel = $config->getInteger('logging.level', self::INFO);
@@ -430,8 +430,8 @@ class Logger
                 $string = implode(",", $string);
             }
 
-            $formats = ['%trackid', '%msg', '%srcip', '%stat'];
-            $replacements = [self::$trackid, $string, $_SERVER['REMOTE_ADDR']];
+            $formats = array('%trackid', '%msg', '%srcip', '%stat');
+            $replacements = array(self::$trackid, $string, $_SERVER['REMOTE_ADDR']);
 
             $stat = '';
             if ($statsLog) {

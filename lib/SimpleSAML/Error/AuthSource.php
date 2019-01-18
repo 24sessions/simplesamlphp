@@ -1,16 +1,14 @@
 <?php
-
-namespace SimpleSAML\Error;
-
 /**
  * Baseclass for auth source exceptions.
  *
  * @package SimpleSAMLphp_base
  *
  */
-
-class AuthSource extends Error
+class SimpleSAML_Error_AuthSource extends SimpleSAML_Error_Error
 {
+
+
     /**
      * Authsource module name.
      */
@@ -37,11 +35,11 @@ class AuthSource extends Error
         $this->authsource = $authsource;
         $this->reason = $reason;
         parent::__construct(
-            [
+            array(
                 'AUTHSOURCEERROR',
                 '%AUTHSOURCE%' => htmlspecialchars(var_export($this->authsource, true)),
                 '%REASON%' => htmlspecialchars(var_export($this->reason, true))
-            ],
+            ),
             $cause
         );
 

@@ -1,14 +1,11 @@
 <?php
 
-namespace SimpleSAML\Module\saml;
-
 /**
  * Base filter for generating NameID values.
  *
  * @package SimpleSAMLphp
  */
-
-abstract class BaseNameIDGenerator extends \SimpleSAML\Auth\ProcessingFilter
+abstract class sspmod_saml_BaseNameIDGenerator extends SimpleSAML_Auth_ProcessingFilter
 {
     /**
      * What NameQualifier should be used.
@@ -93,28 +90,29 @@ abstract class BaseNameIDGenerator extends \SimpleSAML\Auth\ProcessingFilter
         }
 
         $nameId = new \SAML2\XML\saml\NameID();
-        $nameId->setValue($value);
+        $nameId->value = $value;
 
         if ($this->nameQualifier === true) {
             if (isset($state['IdPMetadata']['entityid'])) {
-                $nameId->setNameQualifier($state['IdPMetadata']['entityid']);
+                $nameId->NameQualifier = $state['IdPMetadata']['entityid'];
             } else {
-                \SimpleSAML\Logger::warning('No IdP entity ID, unable to set NameQualifier.');
+                SimpleSAML\Logger::warning('No IdP entity ID, unable to set NameQualifier.');
             }
         } elseif (is_string($this->nameQualifier)) {
-            $nameId->setNameQualifier($this->nameQualifier);
+            $nameId->NameQualifier = $this->nameQualifier;
         }
 
         if ($this->spNameQualifier === true) {
             if (isset($state['SPMetadata']['entityid'])) {
-                $nameId->setSPNameQualifier($state['SPMetadata']['entityid']);
+                $nameId->SPNameQualifier = $state['SPMetadata']['entityid'];
             } else {
-                \SimpleSAML\Logger::warning('No SP entity ID, unable to set SPNameQualifier.');
+                SimpleSAML\Logger::warning('No SP entity ID, unable to set SPNameQualifier.');
             }
         } elseif (is_string($this->spNameQualifier)) {
-            $nameId->setSPNameQualifier($this->spNameQualifier);
+            $nameId->SPNameQualifier = $this->spNameQualifier;
         }
 
         $state['saml:NameID'][$this->format] = $nameId;
     }
+
 }

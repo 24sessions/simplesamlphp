@@ -1,13 +1,9 @@
 <?php
-
-namespace SimpleSAML\Module\statistics\Statistics\Rulesets;
-
 /*
  * @author Andreas Åkre Solberg <andreas.solberg@uninett.no>
  * @package SimpleSAMLphp
  */
-
-class BaseRule
+class sspmod_statistics_Statistics_Rulesets_BaseRule
 {
     protected $statconfig;
     protected $ruleconfig;
@@ -19,15 +15,15 @@ class BaseRule
      */
     public function __construct($statconfig, $ruleconfig, $ruleid, $available)
     {
-        assert($statconfig instanceof \SimpleSAML\Configuration);
-        assert($ruleconfig instanceof \SimpleSAML\Configuration);
+        assert($statconfig instanceof SimpleSAML_Configuration);
+        assert($ruleconfig instanceof SimpleSAML_Configuration);
         $this->statconfig = $statconfig;
         $this->ruleconfig = $ruleconfig;
         $this->ruleid = $ruleid;
 
         $this->available = null;
         if (array_key_exists($ruleid, $available)) {
-            $this->available = $available[$ruleid];
+            $this->available = $available[$ruleid];	
         }
     }
 
@@ -36,10 +32,9 @@ class BaseRule
         return $this->ruleid;
     }
 
-    public function availableTimeRes()
-    {
+    public function availableTimeRes() {
         $timeresConfigs = $this->statconfig->getValue('timeres');
-        $available_times = [];
+        $available_times = array(); 
         foreach ($timeresConfigs as $tres => $tresconfig) {
             if (array_key_exists($tres, $this->available)) {
                 $available_times[$tres] = $tresconfig['name'];
@@ -54,22 +49,17 @@ class BaseRule
         $timeresConfig = $timeresConfigs[$timeres];
 
         if (isset($timeresConfig['customDateHandler']) && $timeresConfig['customDateHandler'] == 'month') {
-            $datehandler = new \SimpleSAML\Module\statistics\DateHandlerMonth(0);
+            $datehandler = new sspmod_statistics_DateHandlerMonth(0);
         } else {
-            $datehandler = new \SimpleSAML\Module\statistics\DateHandler($this->statconfig->getValue('offset', 0));
+            $datehandler = new sspmod_statistics_DateHandler($this->statconfig->getValue('offset', 0));
         }
 
         /*
          * Get list of avaiable times in current file (rule)
          */
-        $available_times = [];
+        $available_times = array(); 
         foreach ($this->available[$timeres] as $slot) {
-            $available_times[$slot] = $datehandler->prettyHeader(
-                $slot,
-                $slot + 1,
-                $timeresConfig['fileslot'],
-                $timeresConfig['dateformat-period']
-            );
+            $available_times[$slot] = $datehandler->prettyHeader($slot, $slot + 1, $timeresConfig['fileslot'], $timeresConfig['dateformat-period']);
         }
         return $available_times;
     }
@@ -115,20 +105,15 @@ class BaseRule
         if ($timeslotindex[$fileslot] < (count($timeslotindex) - 1)) {
             $available_times_next = $timeslots[$timeslotindex[$fileslot] + 1];
         }
-        return ['prev' => $available_times_prev, 'next' => $available_times_next];
+        return array('prev' => $available_times_prev, 'next' => $available_times_next);
     }
 
     public function getDataSet($preferTimeRes, $preferTime)
     {
         $timeres = $this->resolveTimeRes($preferTimeRes);
         $fileslot = $this->resolveFileSlot($timeres, $preferTime);
-        $dataset = new \SimpleSAML\Module\statistics\StatDataset(
-            $this->statconfig,
-            $this->ruleconfig,
-            $this->ruleid,
-            $timeres,
-            $fileslot
-        );
+        $dataset = new sspmod_statistics_StatDataset($this->statconfig, $this->ruleconfig, $this->ruleid, $timeres, $fileslot);
         return $dataset;
     }
 }
+

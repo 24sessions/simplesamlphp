@@ -1,14 +1,11 @@
 <?php
 
-namespace SimpleSAML\Module\saml\IdP;
-
 /**
  * Helper class for working with persistent NameIDs stored in SQL datastore.
  *
  * @package SimpleSAMLphp
  */
-
-class SQLNameID
+class sspmod_saml_IdP_SQLNameID
 {
     /**
      * Create NameID table in SQL, if it is missing.
@@ -21,7 +18,7 @@ class SQLNameID
             return;
         }
 
-        $query = 'CREATE TABLE '.$store->prefix.'_saml_PersistentNameID (
+        $query = 'CREATE TABLE ' . $store->prefix . '_saml_PersistentNameID (
             _idp VARCHAR(256) NOT NULL,
             _sp VARCHAR(256) NOT NULL,
             _user VARCHAR(256) NOT NULL,
@@ -30,8 +27,7 @@ class SQLNameID
         )';
         $store->pdo->exec($query);
 
-        $query = 'CREATE INDEX '.$store->prefix.'_saml_PersistentNameID_idp_sp ON ';
-        $query .= $store->prefix.'_saml_PersistentNameID (_idp, _sp)';
+        $query = 'CREATE INDEX ' . $store->prefix . '_saml_PersistentNameID_idp_sp ON '  . $store->prefix . '_saml_PersistentNameID (_idp, _sp)';
         $store->pdo->exec($query);
 
         $store->setTableVersion('saml_PersistentNameID', 1);
@@ -49,9 +45,7 @@ class SQLNameID
     {
         $store = \SimpleSAML\Store::getInstance();
         if (!($store instanceof \SimpleSAML\Store\SQL)) {
-            throw new \SimpleSAML\Error\Exception(
-                'SQL NameID store requires SimpleSAMLphp to be configured with a SQL datastore.'
-            );
+            throw new SimpleSAML_Error_Exception('SQL NameID store requires SimpleSAMLphp to be configured with a SQL datastore.');
         }
 
         self::createTable($store);
@@ -78,15 +72,14 @@ class SQLNameID
 
         $store = self::getStore();
 
-        $params = [
+        $params = array(
             '_idp' => $idpEntityId,
             '_sp' => $spEntityId,
             '_user' => $user,
             '_value' => $value,
-        ];
+        );
 
-        $query = 'INSERT INTO '.$store->prefix;
-        $query .= '_saml_PersistentNameID (_idp, _sp, _user, _value) VALUES(:_idp, :_sp, :_user, :_value)';
+        $query = 'INSERT INTO ' . $store->prefix . '_saml_PersistentNameID (_idp, _sp, _user, _value) VALUES(:_idp, :_sp, :_user, :_value)';
         $query = $store->pdo->prepare($query);
         $query->execute($params);
     }
@@ -108,18 +101,17 @@ class SQLNameID
 
         $store = self::getStore();
 
-        $params = [
+        $params = array(
             '_idp' => $idpEntityId,
             '_sp' => $spEntityId,
             '_user' => $user,
-        ];
+        );
 
-        $query = 'SELECT _value FROM '.$store->prefix;
-        $query .= '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp AND _user = :_user';
+        $query = 'SELECT _value FROM ' . $store->prefix . '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp AND _user = :_user';
         $query = $store->pdo->prepare($query);
         $query->execute($params);
 
-        $row = $query->fetch(\PDO::FETCH_ASSOC);
+        $row = $query->fetch(PDO::FETCH_ASSOC);
         if ($row === false) {
             // No NameID found
             return null;
@@ -144,14 +136,13 @@ class SQLNameID
 
         $store = self::getStore();
 
-        $params = [
+        $params = array(
             '_idp' => $idpEntityId,
             '_sp' => $spEntityId,
             '_user' => $user,
-        ];
+        );
 
-        $query = 'DELETE FROM '.$store->prefix;
-        $query .= '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp AND _user = :_user';
+        $query = 'DELETE FROM ' . $store->prefix . '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp AND _user = :_user';
         $query = $store->pdo->prepare($query);
         $query->execute($params);
     }
@@ -171,18 +162,17 @@ class SQLNameID
 
         $store = self::getStore();
 
-        $params = [
+        $params = array(
             '_idp' => $idpEntityId,
             '_sp' => $spEntityId,
-        ];
+        );
 
-        $query = 'SELECT _user, _value FROM '.$store->prefix;
-        $query .= '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp';
+        $query = 'SELECT _user, _value FROM ' . $store->prefix . '_saml_PersistentNameID WHERE _idp = :_idp AND _sp = :_sp';
         $query = $store->pdo->prepare($query);
         $query->execute($params);
 
-        $res = [];
-        while (($row = $query->fetch(\PDO::FETCH_ASSOC)) !== false) {
+        $res = array();
+        while (($row = $query->fetch(PDO::FETCH_ASSOC)) !== false) {
             $res[$row['_user']] = $row['_value'];
         }
 

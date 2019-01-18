@@ -11,16 +11,16 @@ use SimpleSAML\Logger;
  * @author Jaime Pérez Crespo, UNINETT AS <jaime.perez@uninett.no>
  * @package SimpleSAMLphp
  */
-
-class FilterScopes extends \SimpleSAML\Auth\ProcessingFilter
+class FilterScopes extends \SimpleSAML_Auth_ProcessingFilter
 {
+
     /**
      * Stores any pre-configured scoped attributes which come from the filter configuration.
      */
-    private $scopedAttributes = [
+    private $scopedAttributes = array(
         'eduPersonScopedAffiliation',
         'eduPersonPrincipalName'
-    ];
+    );
 
 
     /**
@@ -53,7 +53,7 @@ class FilterScopes extends \SimpleSAML\Auth\ProcessingFilter
             Logger::warning('No scoped attributes configured.');
             return;
         }
-        $validScopes = [];
+        $validScopes = array();
         if (array_key_exists('scope', $src) && is_array($src['scope']) && !empty($src['scope'])) {
             $validScopes = $src['scope'];
         }
@@ -64,7 +64,7 @@ class FilterScopes extends \SimpleSAML\Auth\ProcessingFilter
             }
 
             $values = $request['Attributes'][$attribute];
-            $newValues = [];
+            $newValues = array();
             foreach ($values as $value) {
                 $ep = \SimpleSAML\Utils\Config\Metadata::getDefaultEndpoint($request['Source']['SingleSignOnService']);
                 $loc = $ep['Location'];
