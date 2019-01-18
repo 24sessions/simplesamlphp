@@ -1,7 +1,5 @@
 <?php
 
-namespace SimpleSAML\Auth;
-
 /**
  * Class for implementing authentication processing chains for IdPs.
  *
@@ -12,19 +10,20 @@ namespace SimpleSAML\Auth;
  * @author Olav Morken, UNINETT AS.
  * @package SimpleSAMLphp
  */
-
-class ProcessingChain
+class SimpleSAML_Auth_ProcessingChain
 {
+
+
     /**
      * The list of remaining filters which should be applied to the state.
      */
-    const FILTERS_INDEX = '\SimpleSAML\Auth\ProcessingChain.filters';
+    const FILTERS_INDEX = 'SimpleSAML_Auth_ProcessingChain.filters';
 
 
     /**
      * The stage we use for completed requests.
      */
-    const COMPLETED_STAGE = '\SimpleSAML\Auth\ProcessingChain.completed';
+    const COMPLETED_STAGE = 'SimpleSAML_Auth_ProcessingChain.completed';
 
 
     /**
@@ -52,10 +51,10 @@ class ProcessingChain
         assert(is_array($idpMetadata));
         assert(is_array($spMetadata));
 
-        $this->filters = [];
+        $this->filters = array();
 
-        $config = \SimpleSAML\Configuration::getInstance();
-        $configauthproc = $config->getArray('authproc.'.$mode, null);
+        $config = SimpleSAML_Configuration::getInstance();
+        $configauthproc = $config->getArray('authproc.' . $mode, null);
 
         if (!empty($configauthproc)) {
             $configfilters = self::parseFilterList($configauthproc);
@@ -72,8 +71,9 @@ class ProcessingChain
             self::addFilters($this->filters, $spFilters);
         }
 
-        \SimpleSAML\Logger::debug('Filter config for '.$idpMetadata['entityid'].'->'.
-            $spMetadata['entityid'].': '.str_replace("\n", '', var_export($this->filters, true)));
+
+        SimpleSAML\Logger::debug('Filter config for ' . $idpMetadata['entityid'] . '->' .
+            $spMetadata['entityid'] . ': ' . str_replace("\n", '', var_export($this->filters, true)));
     }
 
 
@@ -94,14 +94,14 @@ class ProcessingChain
             $fp = $filter->priority;
 
             // Find insertion position for filter
-            for ($i = count($target) - 1; $i >= 0; $i--) {
+            for ($i = count($target)-1; $i >= 0; $i--) {
                 if ($target[$i]->priority <= $fp) {
                     // The new filter should be inserted after this one
                     break;
                 }
             }
             /* $i now points to the filter which should preceede the current filter. */
-            array_splice($target, $i + 1, 0, [$filter]);
+            array_splice($target, $i+1, 0, array($filter));
         }
     }
 
@@ -110,21 +110,21 @@ class ProcessingChain
      * Parse an array of authentication processing filters.
      *
      * @param array $filterSrc  Array with filter configuration.
-     * @return array  Array of ProcessingFilter objects.
+     * @return array  Array of SimpleSAML_Auth_ProcessingFilter objects.
      */
     private static function parseFilterList($filterSrc)
     {
         assert(is_array($filterSrc));
 
-        $parsedFilters = [];
+        $parsedFilters = array();
 
         foreach ($filterSrc as $priority => $filter) {
             if (is_string($filter)) {
-                $filter = ['class' => $filter];
+                $filter = array('class' => $filter);
             }
 
             if (!is_array($filter)) {
-                throw new \Exception('Invalid authentication processing filter configuration: '.
+                throw new Exception('Invalid authentication processing filter configuration: ' .
                     'One of the filters wasn\'t a string or an array.');
             }
 
@@ -138,24 +138,20 @@ class ProcessingChain
     /**
      * Parse an authentication processing filter.
      *
-     * @param array $config      Array with the authentication processing filter configuration.
-     * @param int $priority      The priority of the current filter, (not included in the filter
-     *                           definition.)
-     * @return ProcessingFilter  The parsed filter.
+     * @param array $config     Array with the authentication processing filter configuration.
+     * @param int $priority     The priority of the current filter, (not included in the filter
+     *                          definition.)
+     * @return SimpleSAML_Auth_ProcessingFilter  The parsed filter.
      */
     private static function parseFilter($config, $priority)
     {
         assert(is_array($config));
 
         if (!array_key_exists('class', $config)) {
-            throw new \Exception('Authentication processing filter without name given.');
+            throw new Exception('Authentication processing filter without name given.');
         }
 
-        $className = \SimpleSAML\Module::resolveClass(
-            $config['class'],
-            'Auth\Process',
-            '\SimpleSAML\Auth\ProcessingFilter'
-        );
+        $className = SimpleSAML\Module::resolveClass($config['class'], 'Auth_Process', 'SimpleSAML_Auth_ProcessingFilter');
         $config['%priority'] = $priority;
         unset($config['class']);
         return new $className($config, null);
@@ -174,11 +170,11 @@ class ProcessingChain
      * If an exception is thrown during processing, it should be handled by the caller of
      * this function. If the user has redirected to a different page, the exception will be
      * returned through the exception handler defined on the state array. See
-     * State for more information.
+     * SimpleSAML_Auth_State for more information.
      *
-     * @see State
-     * @see State::EXCEPTION_HANDLER_URL
-     * @see State::EXCEPTION_HANDLER_FUNC
+     * @see SimpleSAML_Auth_State
+     * @see SimpleSAML_Auth_State::EXCEPTION_HANDLER_URL
+     * @see SimpleSAML_Auth_State::EXCEPTION_HANDLER_FUNC
      *
      * @param array &$state  The state we are processing.
      */
@@ -201,15 +197,15 @@ class ProcessingChain
                 $filter = array_shift($state[self::FILTERS_INDEX]);
                 $filter->process($state);
             }
-        } catch (\SimpleSAML\Error\Exception $e) {
+        } catch (SimpleSAML_Error_Exception $e) {
             // No need to convert the exception
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             /*
-             * To be consistent with the exception we return after an redirect,
-             * we convert this exception before returning it.
-             */
-            throw new \SimpleSAML\Error\UnserializableException($e);
+			 * To be consistent with the exception we return after an redirect,
+			 * we convert this exception before returning it.
+			 */
+            throw new SimpleSAML_Error_UnserializableException($e);
         }
 
         // Completed
@@ -235,11 +231,11 @@ class ProcessingChain
             $filter = array_shift($state[self::FILTERS_INDEX]);
             try {
                 $filter->process($state);
-            } catch (\SimpleSAML\Error\Exception $e) {
-                State::throwException($state, $e);
-            } catch (\Exception $e) {
-                $e = new \SimpleSAML\Error\UnserializableException($e);
-                State::throwException($state, $e);
+            } catch (SimpleSAML_Error_Exception $e) {
+                SimpleSAML_Auth_State::throwException($state, $e);
+            } catch (Exception $e) {
+                $e = new SimpleSAML_Error_UnserializableException($e);
+                SimpleSAML_Auth_State::throwException($state, $e);
             }
         }
 
@@ -251,16 +247,16 @@ class ProcessingChain
 
         if (array_key_exists('ReturnURL', $state)) {
             /*
-             * Save state information, and redirect to the URL specified
-             * in $state['ReturnURL'].
-             */
-            $id = State::saveState($state, self::COMPLETED_STAGE);
-            \SimpleSAML\Utils\HTTP::redirectTrustedURL($state['ReturnURL'], [self::AUTHPARAM => $id]);
+			 * Save state information, and redirect to the URL specified
+			 * in $state['ReturnURL'].
+			 */
+            $id = SimpleSAML_Auth_State::saveState($state, self::COMPLETED_STAGE);
+            \SimpleSAML\Utils\HTTP::redirectTrustedURL($state['ReturnURL'], array(self::AUTHPARAM => $id));
         } else {
             /* Pass the state to the function defined in $state['ReturnCall']. */
 
             // We are done with the state array in the session. Delete it.
-            State::deleteState($state);
+            SimpleSAML_Auth_State::deleteState($state);
 
             $func = $state['ReturnCall'];
             assert(is_callable($func));
@@ -302,7 +298,8 @@ class ProcessingChain
             $filter = array_shift($state[self::FILTERS_INDEX]);
             try {
                 $filter->process($state);
-            } catch (\SimpleSAML\Error\NoPassive $e) {
+            // Ignore SimpleSAML_Error_NoPassive exceptions
+            } catch (SimpleSAML_Error_NoPassive $e) {
                 // @deprecated will be removed in 2.0
                 // Ignore \SimpleSAML\Error\NoPassive exceptions
             } catch (\SimpleSAML\Module\saml\Error\NoPassive $e) {
@@ -315,14 +312,14 @@ class ProcessingChain
      * Retrieve a state which has finished processing.
      *
      * @param string $id The state identifier.
-     * @see State::parseStateID()
-     * @return array The state referenced by the $id parameter.
+     * @see SimpleSAML_Auth_State::parseStateID()
+     * @return Array The state referenced by the $id parameter.
      */
     public static function fetchProcessedState($id)
     {
         assert(is_string($id));
 
-        return State::loadState($id, self::COMPLETED_STAGE);
+        return SimpleSAML_Auth_State::loadState($id, self::COMPLETED_STAGE);
     }
 
 
@@ -336,10 +333,10 @@ class ProcessingChain
 
         if (isset($state['Destination']['userid.attribute'])) {
             $attributeName = $state['Destination']['userid.attribute'];
-            \SimpleSAML\Logger::debug("The 'userid.attribute' option has been deprecated.");
+            SimpleSAML\Logger::debug("The 'userid.attribute' option has been deprecated.");
         } elseif (isset($state['Source']['userid.attribute'])) {
             $attributeName = $state['Source']['userid.attribute'];
-            \SimpleSAML\Logger::debug("The 'userid.attribute' option has been deprecated.");
+            SimpleSAML\Logger::debug("The 'userid.attribute' option has been deprecated.");
         } else {
             // Default attribute
             $attributeName = 'eduPersonPrincipalName';
@@ -351,12 +348,12 @@ class ProcessingChain
 
         $uid = $state['Attributes'][$attributeName];
         if (count($uid) === 0) {
-            \SimpleSAML\Logger::warning('Empty user id attribute ['.$attributeName.'].');
+            SimpleSAML\Logger::warning('Empty user id attribute [' . $attributeName . '].');
             return;
         }
 
         if (count($uid) > 1) {
-            \SimpleSAML\Logger::warning('Multiple attribute values for user id attribute ['.$attributeName.'].');
+            SimpleSAML\Logger::warning('Multiple attribute values for user id attribute [' . $attributeName . '].');
             return;
         }
 
@@ -364,7 +361,7 @@ class ProcessingChain
         $uid = $uid[0];
 
         if (empty($uid)) {
-            \SimpleSAML\Logger::warning('Empty value in attribute '.$attributeName.". on user. Cannot set UserID.");
+            SimpleSAML\Logger::warning('Empty value in attribute '.$attributeName.". on user. Cannot set UserID.");
             return;
         }
         $state['UserID'] = $uid;
