@@ -68,13 +68,16 @@ class Config
     {
         $configDir    = dirname(dirname(dirname(__DIR__))) . '/config';
         /** @var string|false $configDirEnv */
-        $configDirEnv = getenv('SIMPLESAMLPHP_CONFIG_DIR');
+        $configDirEnv = !empty($_SERVER['SIMPLESAMLPHP_CONFIG_DIR']) ? $_SERVER['SIMPLESAMLPHP_CONFIG_DIR'] : getenv('SIMPLESAMLPHP_CONFIG_DIR');
         
         if($configDirEnv === false) {
-            $configDirEnv = getenv('REDIRECT_SIMPLESAMLPHP_CONFIG_DIR');
+            $configDirEnv = !empty($_SERVER['REDIRECT_SIMPLESAMLPHP_CONFIG_DIR']) ? $_SERVER['REDIRECT_SIMPLESAMLPHP_CONFIG_DIR'] : getenv('REDIRECT_SIMPLESAMLPHP_CONFIG_DIR');
         }
         
         if ($configDirEnv !== false) {
+            if (in_array($configDirEnv{0}, ['.', '..'])) {
+                $configDirEnv = getcwd() .'/'. $configDirEnv;
+            }
             if (!is_dir($configDirEnv)) {
                 throw new \InvalidArgumentException(
                     sprintf(
