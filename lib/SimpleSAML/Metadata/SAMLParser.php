@@ -19,7 +19,7 @@ class SimpleSAML_Metadata_SAMLParser
      *
      * @var string[]
      */
-    private static $SAML1xProtocols = array(
+    public static $SAML1xProtocols = array(
         'urn:oasis:names:tc:SAML:1.0:protocol',
         'urn:oasis:names:tc:SAML:1.1:protocol',
     );
@@ -29,7 +29,7 @@ class SimpleSAML_Metadata_SAMLParser
      *
      * @var string[]
      */
-    private static $SAML20Protocols = array(
+    public static $SAML20Protocols = array(
         'urn:oasis:names:tc:SAML:2.0:protocol',
     );
 
@@ -433,7 +433,16 @@ class SimpleSAML_Metadata_SAMLParser
     }
 
 
-    private function getMetadataCommon()
+    /**
+     * @return array|\SAML2\SignedElementHelper[]
+     */
+    public function getValidators()
+    {
+        return $this->validators;
+    }
+
+
+    public function getMetadataCommon()
     {
         $ret = array();
         $ret['entityid'] = $this->entityId;
@@ -1358,11 +1367,11 @@ class SimpleSAML_Metadata_SAMLParser
     /**
      * This function finds IdP descriptors which supports one of the given protocols.
      *
-     * @param $protocols Array with the protocols we accept.
+     * @param $protocols array with the protocols we accept.
      *
-     * @return Array with IdP descriptors which supports one of the given protocols.
+     * @return array with IdP descriptors which supports one of the given protocols.
      */
-    private function getIdPDescriptors($protocols)
+    public function getIdPDescriptors($protocols)
     {
         assert(is_array($protocols));
 
