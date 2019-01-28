@@ -1,7 +1,7 @@
 {
     "name": "24sessions/simplesamlphp",
     "description": "Fork of simplesamlphp/simplesamlphp 1.16.3",
-    "version": "1.16.5",
+    "version": "1.16.6",
     "type": "project",
     "keywords": [ "saml2", "shibboleth","oauth","ws-federation","sp","idp" ],
     "homepage": "http://simplesamlphp.org",

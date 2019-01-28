@@ -461,6 +461,16 @@ class SimpleSAML_Configuration implements \SimpleSAML\Utils\ClearableState
 
 
     /**
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setValue($name, $value)
+    {
+        $this->configuration[$name] = $value;
+    }
+
+
+    /**
      * Check whether any key of the set given exists in the configuration.
      *
      * @param array $names An array of options to look for.
