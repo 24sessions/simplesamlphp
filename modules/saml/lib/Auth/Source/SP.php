@@ -45,7 +45,7 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
         parent::__construct($info, $config);
 
         if (!isset($config['entityID'])) {
-            $config['entityID'] = $this->getMetadataURL();
+            $config['entityID'] = !empty($config['url.metadata']) ? $config['url.metadata'] : $this->getMetadataURL();
         }
 
         /* For compatibility with code that assumes that $metadata->getString('entityid')
@@ -158,7 +158,7 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
         if ($useArtifact) {
             $shire = SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId . '/artifact');
         } else {
-            $shire = SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId);
+            $shire = $this->metadata->getString('url.acs.v1', '') ?: SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId);
         }
 
         $url = $ar->createRedirect($idpEntityId, $shire);
@@ -185,7 +185,7 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
 
         $ar = sspmod_saml_Message::buildAuthnRequest($this->metadata, $idpMetadata);
 
-        $ar->setAssertionConsumerServiceURL(SimpleSAML\Module::getModuleURL('saml/sp/saml2-acs.php/' . $this->authId));
+        $ar->setAssertionConsumerServiceURL($this->metadata->getString('url.acs.v2', '') ?: SimpleSAML\Module::getModuleURL('saml/sp/saml2-acs.php/' . $this->authId));
 
         if (isset($state['SimpleSAML_Auth_Source.ReturnURL'])) {
             $ar->setRelayState($state['SimpleSAML_Auth_Source.ReturnURL']);

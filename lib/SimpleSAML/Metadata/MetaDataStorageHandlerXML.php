@@ -59,25 +59,29 @@ class SimpleSAML_Metadata_MetaDataStorageHandlerXML extends SimpleSAML_Metadata_
         } else {
             throw new Exception("Neither source file path/URI nor string data provided");
         }
+
+        $defaultSpIndex = !empty($config['default_index.sp']) ? $config['default_index.sp'] : '';
+        $defaultIdpIndex = !empty($config['default_index.idp']) ? $config['default_index.idp'] : '';
+
         foreach ($entities as $entityId => $entity) {
             $md = $entity->getMetadata1xSP();
             if ($md !== null) {
-                $SP1x[$entityId] = $md;
+                $SP1x[$defaultSpIndex ?: $entityId] = $md;
             }
 
             $md = $entity->getMetadata1xIdP();
             if ($md !== null) {
-                $IdP1x[$entityId] = $md;
+                $IdP1x[$defaultIdpIndex ?: $entityId] = $md;
             }
 
             $md = $entity->getMetadata20SP();
             if ($md !== null) {
-                $SP20[$entityId] = $md;
+                $SP20[$defaultSpIndex ?: $entityId] = $md;
             }
 
             $md = $entity->getMetadata20IdP();
             if ($md !== null) {
-                $IdP20[$entityId] = $md;
+                $IdP20[$defaultIdpIndex ?: $entityId] = $md;
             }
 
             $md = $entity->getAttributeAuthorities();

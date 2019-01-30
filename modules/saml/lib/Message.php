@@ -574,6 +574,7 @@ class sspmod_saml_Message
      * @param SimpleSAML_Configuration $spMetadata The metadata of the service provider.
      * @param SimpleSAML_Configuration $idpMetadata The metadata of the identity provider.
      * @param \SAML2\Response $response The response.
+     * @param bool $withQuery
      *
      * @return array Array with \SAML2\Assertion objects, containing valid assertions from the response.
      *
@@ -583,14 +584,15 @@ class sspmod_saml_Message
     public static function processResponse(
         SimpleSAML_Configuration $spMetadata,
         SimpleSAML_Configuration $idpMetadata,
-        \SAML2\Response $response
+        \SAML2\Response $response,
+        $withQuery = false
     ) {
         if (!$response->isSuccess()) {
             throw self::getResponseError($response);
         }
 
         // validate Response-element destination
-        $currentURL = \SimpleSAML\Utils\HTTP::getSelfURLNoQuery();
+        $currentURL = $withQuery ? \SimpleSAML\Utils\HTTP::getSelfURL() : \SimpleSAML\Utils\HTTP::getSelfURLNoQuery();
         $msgDestination = $response->getDestination();
         if ($msgDestination !== null && $msgDestination !== $currentURL) {
             throw new Exception('Destination in response doesn\'t match the current URL. Destination is "'.
@@ -610,7 +612,7 @@ class sspmod_saml_Message
 
         $ret = array();
         foreach ($assertion as $a) {
-            $ret[] = self::processAssertion($spMetadata, $idpMetadata, $response, $a, $responseSigned);
+            $ret[] = self::processAssertion($spMetadata, $idpMetadata, $response, $a, $responseSigned, $withQuery);
         }
 
         return $ret;
@@ -625,6 +627,7 @@ class sspmod_saml_Message
      * @param \SAML2\Response $response The response containing the assertion.
      * @param \SAML2\Assertion|\SAML2\EncryptedAssertion $assertion The assertion.
      * @param bool $responseSigned Whether the response is signed.
+     * @param bool $withQuery
      *
      * @return \SAML2\Assertion The assertion, if it is valid.
      *
@@ -638,7 +641,8 @@ class sspmod_saml_Message
         SimpleSAML_Configuration $idpMetadata,
         \SAML2\Response $response,
         $assertion,
-        $responseSigned
+        $responseSigned,
+        $withQuery = false
     ) {
         assert($assertion instanceof \SAML2\Assertion || $assertion instanceof \SAML2\EncryptedAssertion);
         assert(is_bool($responseSigned));
@@ -652,7 +656,7 @@ class sspmod_saml_Message
             }
         } // at least one valid signature found
 
-        $currentURL = \SimpleSAML\Utils\HTTP::getSelfURLNoQuery();
+        $currentURL = $withQuery ? \SimpleSAML\Utils\HTTP::getSelfURL() : \SimpleSAML\Utils\HTTP::getSelfURLNoQuery();
 
         // check various properties of the assertion
         $notBefore = $assertion->getNotBefore();
