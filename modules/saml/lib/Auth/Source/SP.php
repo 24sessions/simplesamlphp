@@ -135,8 +135,9 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
     /**
      * Send a SAML1 SSO request to an IdP.
      *
-     * @param SimpleSAML_Configuration $idpMetadata  The metadata of the IdP.
-     * @param array $state  The state array for the current authentication.
+     * @param SimpleSAML_Configuration $idpMetadata The metadata of the IdP.
+     * @param array $state The state array for the current authentication.
+     * @throws Exception
      */
     private function startSSO1(SimpleSAML_Configuration $idpMetadata, array $state)
     {
@@ -156,7 +157,8 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
         }
 
         if ($useArtifact) {
-            $shire = SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId . '/artifact');
+            $presetUrl = $this->metadata->getString('url.acs.v1', '');
+            $shire = $presetUrl ? $presetUrl .(strpos($presetUrl, '?') !== false ? '&' : '?'). 'artifact=1' : SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId . '/artifact');
         } else {
             $shire = $this->metadata->getString('url.acs.v1', '') ?: SimpleSAML\Module::getModuleURL('saml/sp/saml1-acs.php/' . $this->authId);
         }
@@ -171,8 +173,10 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
     /**
      * Send a SAML2 SSO request to an IdP.
      *
-     * @param SimpleSAML_Configuration $idpMetadata  The metadata of the IdP.
-     * @param array $state  The state array for the current authentication.
+     * @param SimpleSAML_Configuration $idpMetadata The metadata of the IdP.
+     * @param array $state The state array for the current authentication.
+     * @throws SimpleSAML_Error_Exception
+     * @throws \Exception
      */
     private function startSSO2(SimpleSAML_Configuration $idpMetadata, array $state)
     {
@@ -376,7 +380,9 @@ class sspmod_saml_Auth_Source_SP extends SimpleSAML_Auth_Source
      *
      * This function saves the information about the login, and redirects to the IdP.
      *
-     * @param array &$state  Information about the current authentication.
+     * @param array &$state Information about the current authentication.
+     * @throws \SimpleSAML\Module\saml\Error\NoAvailableIDP
+     * @throws \SimpleSAML\Module\saml\Error\NoSupportedIDP
      */
     public function authenticate(&$state)
     {

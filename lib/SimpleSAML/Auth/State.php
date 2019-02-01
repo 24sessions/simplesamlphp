@@ -339,32 +339,40 @@ class SimpleSAML_Auth_State
      * @param SimpleSAML_Error_Exception $exception The exception.
      *
      * @throws SimpleSAML_Error_Exception If there is no exception handler defined, it will just throw the $exception.
+     * @throws \Exception
      */
     public static function throwException($state, SimpleSAML_Error_Exception $exception)
     {
         assert(is_array($state));
 
-        if (array_key_exists(self::EXCEPTION_HANDLER_URL, $state)) {
-            // Save the exception
-            $state[self::EXCEPTION_DATA] = $exception;
-            $id = self::saveState($state, self::EXCEPTION_STAGE);
+        $config = \SimpleSAML_Configuration::getInstance();
+        $handlerAllowed = $config->getBoolean('enable.error_handler', true);
 
-            // Redirect to the exception handler
-            \SimpleSAML\Utils\HTTP::redirectTrustedURL(
-                $state[self::EXCEPTION_HANDLER_URL],
-                array(self::EXCEPTION_PARAM => $id)
-            );
-        } elseif (array_key_exists(self::EXCEPTION_HANDLER_FUNC, $state)) {
-            // Call the exception handler
-            $func = $state[self::EXCEPTION_HANDLER_FUNC];
-            assert(is_callable($func));
+        if ($handlerAllowed) {
+            if (array_key_exists(self::EXCEPTION_HANDLER_URL, $state)) {
+                // Save the exception
+                $state[self::EXCEPTION_DATA] = $exception;
+                $id = self::saveState($state, self::EXCEPTION_STAGE);
 
-            call_user_func($func, $exception, $state);
-            assert(false);
+                // Redirect to the exception handler
+                \SimpleSAML\Utils\HTTP::redirectTrustedURL(
+                    $state[self::EXCEPTION_HANDLER_URL],
+                    array(self::EXCEPTION_PARAM => $id)
+                );
+            } elseif (array_key_exists(self::EXCEPTION_HANDLER_FUNC, $state)) {
+                // Call the exception handler
+                $func = $state[self::EXCEPTION_HANDLER_FUNC];
+                assert(is_callable($func));
+
+                call_user_func($func, $exception, $state);
+                assert(false);
+            } else {
+                /*
+                 * No exception handler is defined for the current state.
+                 */
+                throw $exception;
+            }
         } else {
-            /*
-             * No exception handler is defined for the current state.
-             */
             throw $exception;
         }
     }

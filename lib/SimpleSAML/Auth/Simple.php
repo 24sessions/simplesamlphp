@@ -117,6 +117,8 @@ class Simple
      * Please note: this function never returns.
      *
      * @param array $params Various options to the authentication request.
+     * @throws AuthSourceError
+     * @throws \Exception
      */
     public function login(array $params = array())
     {
@@ -137,8 +139,12 @@ class Simple
             }
         }
 
-        if (is_string($returnTo) && $keepPost && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $returnTo = HTTP::getPOSTRedirectURL($returnTo, $_POST);
+        $config = \SimpleSAML_Configuration::getInstance();
+        $handlerAllowed = $config->getBoolean('enable.success_handler', true);
+        if ($handlerAllowed) {
+            if (is_string($returnTo) && $keepPost && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $returnTo = HTTP::getPOSTRedirectURL($returnTo, $_POST);
+            }
         }
 
         if (array_key_exists('ErrorURL', $params)) {

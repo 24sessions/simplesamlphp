@@ -160,6 +160,7 @@ abstract class SimpleSAML_Auth_Source
      * check it by calling \SimpleSAML\Utils\HTTP::checkURLAllowed().
      * @param array $params Extra information about the login. Different authentication requestors may provide different
      * information. Optional, will default to an empty array.
+     * @throws SimpleSAML_Error_Exception
      */
     public function initLogin($return, $errorURL = null, array $params = array())
     {
