@@ -354,6 +354,7 @@ class Logger
 
         // a set of known logging handlers
         $known_handlers = array(
+            'symfony'  => 'SimpleSAML\Logger\SymfonyLoggingHandler',
             'syslog'   => 'SimpleSAML\Logger\SyslogLoggingHandler',
             'file'     => 'SimpleSAML\Logger\FileLoggingHandler',
             'errorlog' => 'SimpleSAML\Logger\ErrorLogLoggingHandler',

@@ -187,9 +187,10 @@ class SimpleSAML_Auth_State
      *
      * @param array  &$state The login request state.
      * @param string $stage The current stage in the login process.
-     * @param bool   $rawId Return a raw ID, without a restart URL.
+     * @param bool $rawId Return a raw ID, without a restart URL.
      *
      * @return string  Identifier which can be used to retrieve the state later.
+     * @throws Exception
      */
     public static function saveState(&$state, $stage, $rawId = false)
     {
@@ -207,6 +208,11 @@ class SimpleSAML_Auth_State
         $serializedState = serialize($state);
         $session = SimpleSAML_Session::getSessionFromRequest();
         $session->setData('SimpleSAML_Auth_State', $id, $serializedState, self::getStateTimeout());
+
+        $config = \SimpleSAML_Configuration::getInstance();
+        if ($config->getBoolean('session.flush_instantly', false)) {
+            $session->save();
+        }
 
         SimpleSAML\Logger::debug('Saved state: '.var_export($return, true));
 
