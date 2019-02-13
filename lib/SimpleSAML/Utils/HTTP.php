@@ -78,11 +78,17 @@ class HTTP
      * Retrieve HTTPS status from $_SERVER environment variables.
      *
      * @return boolean True if the request was performed through HTTPS, false otherwise.
+     * @throws \Exception
      *
      * @author Olav Morken, UNINETT AS <olav.morken@uninett.no>
      */
     public static function getServerHTTPS()
     {
+        $cfg = \SimpleSAML_Configuration::getInstance();
+        if ($cfg->getBoolean('url.only_secure', false)) {
+            return true;
+        }
+
         if (!array_key_exists('HTTPS', $_SERVER)) {
             // not an https-request
             return false;
@@ -103,13 +109,20 @@ class HTTP
      *
      * @return string The port number prepended by a colon, if it is different than the default port for the protocol
      *     (80 for HTTP, 443 for HTTPS), or an empty string otherwise.
+     * @throws \Exception
      *
      * @author Olav Morken, UNINETT AS <olav.morken@uninett.no>
      */
     public static function getServerPort()
     {
         $default_port = self::getServerHTTPS() ? '443' : '80';
-        $port = isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : $default_port;
+
+        $cfg = \SimpleSAML_Configuration::getInstance();
+        if ($cfg->getBoolean('url.ignore_port', false)) {
+            $port = $default_port;
+        } else {
+            $port = isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : $default_port;
+        }
 
         // Take care of edge-case where SERVER_PORT is an integer
         $port = strval($port);
