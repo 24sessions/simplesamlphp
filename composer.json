@@ -1,7 +1,7 @@
 {
     "name": "24sessions/simplesamlphp",
     "description": "Fork of simplesamlphp/simplesamlphp 1.16.3",
-    "version": "1.16.10",
+    "version": "1.16.11",
     "type": "project",
     "keywords": [ "saml2", "shibboleth","oauth","ws-federation","sp","idp" ],
     "homepage": "http://simplesamlphp.org",
@@ -48,9 +48,6 @@
         "phpunit/phpunit": "~4.8.35",
         "mikey179/vfsStream": "~1.6",
         "friendsofphp/php-cs-fixer": "^2.2"
-    },
-    "suggests": {
-        "predis/predis": "1.1.1"
     },
     "support": {
         "issues": "https://github.com/simplesamlphp/simplesamlphp/issues",
